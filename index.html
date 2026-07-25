@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>お茶会 | 季節をいただく、静かなひととき</title>
+  <meta name="description" content="はじめての方も、作法を知らない方も歓迎の小さなお茶会。季節の主菓子とお抹茶を、肩の力を抜いて味わう二時間です。">
+  <meta property="og:title" content="お茶会 | 季節をいただく、静かなひととき">
+  <meta property="og:description" content="はじめての方も歓迎の小さなお茶会。季節の主菓子とお抹茶を味わう二時間です。">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#6b8e5a">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127861;</text></svg>">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">本文へスキップ</a>
+
+  <header class="site-header" id="siteHeader">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">茶</span>
+        <span class="brand-text">
+          <span class="brand-ja">お茶会</span>
+          <span class="brand-en">OTYAKAI</span>
+        </span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav">
+        <span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="visually-hidden">メニューを開く</span>
+      </button>
+
+      <nav class="site-nav" id="siteNav" aria-label="メインナビゲーション">
+        <ul>
+          <li><a href="#about">お茶会について</a></li>
+          <li><a href="#flow">当日の流れ</a></li>
+          <li><a href="#access">会場・アクセス</a></li>
+          <li><a href="#faq">よくある質問</a></li>
+          <li><a class="nav-cta" href="#rsvp">参加申し込み</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ヒーロー -->
+    <section class="hero" id="top">
+      <div class="wrap hero-inner">
+        <p class="eyebrow reveal">第十二回 · 秋の茶会</p>
+        <h1 class="hero-title reveal">
+          季節をいただく、<br>静かなひととき。
+        </h1>
+        <p class="hero-lead reveal">
+          作法は知らなくてかまいません。畳の上に座って、菓子をひとつ、茶を一服。
+          それだけの会です。はじめての方が半分以上、というくらいの気楽さで開いています。
+        </p>
+
+        <dl class="hero-facts reveal">
+          <div>
+            <dt>日時</dt>
+            <dd><time datetime="2026-10-11T13:00">2026年10月11日（日）13:00 〜 15:00</time></dd>
+          </div>
+          <div>
+            <dt>会場</dt>
+            <dd>市民文化会館 和室「松風」</dd>
+          </div>
+          <div>
+            <dt>参加費</dt>
+            <dd>お一人 2,000円（菓子・抹茶代込み）</dd>
+          </div>
+          <div>
+            <dt>定員</dt>
+            <dd>各部 12名（全2部制）</dd>
+          </div>
+        </dl>
+
+        <div class="hero-actions reveal">
+          <a class="btn btn-primary" href="#rsvp">参加を申し込む</a>
+          <a class="btn btn-ghost" href="#about">どんな会か見る</a>
+        </div>
+
+        <div class="countdown reveal" id="countdown" data-event="2026-10-11T13:00:00+09:00" hidden>
+          <span class="countdown-label">開催まで</span>
+          <span class="countdown-values" id="countdownValues"></span>
+        </div>
+      </div>
+      <div class="hero-deco" aria-hidden="true"></div>
+    </section>
+
+    <!-- お茶会について -->
+    <section class="section" id="about">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="section-eyebrow">About</p>
+          <h2 class="section-title">お茶会について</h2>
+          <p class="section-lead">
+            月に一度、季節の変わり目にあわせて開いている小さな茶会です。
+            流派の稽古ではないので、正座がつらければ椅子を出しますし、途中で足を崩してもどなたも気にしません。
+          </p>
+        </header>
+
+        <ul class="card-grid">
+          <li class="card reveal">
+            <span class="card-icon" aria-hidden="true">初</span>
+            <h3>はじめてでも大丈夫</h3>
+            <p>
+              茶碗の持ち方から、その場でお伝えします。「知らないまま来る」のがいちばん歓迎される会です。
+              前もって覚えてくることは何もありません。
+            </p>
+          </li>
+          <li class="card reveal">
+            <span class="card-icon" aria-hidden="true">菓</span>
+            <h3>季節の主菓子</h3>
+            <p>
+              毎回、近所の和菓子屋さんに季節にあわせてつくってもらっています。
+              十月は栗を使った練り切りの予定です。
+            </p>
+          </li>
+          <li class="card reveal">
+            <span class="card-icon" aria-hidden="true">服</span>
+            <h3>服装は自由</h3>
+            <p>
+              着物でも普段着でもかまいません。畳に座るので、動きやすい服装だと楽です。
+              白い靴下があるとより気持ちよく過ごせます。
+            </p>
+          </li>
+          <li class="card reveal">
+            <span class="card-icon" aria-hidden="true">静</span>
+            <h3>二時間だけの静けさ</h3>
+            <p>
+              携帯電話は入口の籠にお預かりします。二時間、通知の来ない時間を過ごしていただくのが、
+              この会でいちばん大切にしていることです。
+            </p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 当日の流れ -->
+    <section class="section section-alt" id="flow">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="section-eyebrow">Schedule</p>
+          <h2 class="section-title">当日の流れ</h2>
+          <p class="section-lead">
+            全2部制です。お申し込みの際にご希望の部をお選びください。以下は第一部の場合の時間です。
+          </p>
+        </header>
+
+        <ol class="timeline">
+          <li class="timeline-item reveal">
+            <span class="timeline-time"><time datetime="12:45">12:45</time></span>
+            <div class="timeline-body">
+              <h3>受付・お着替え</h3>
+              <p>和室の前で受付をします。荷物と携帯電話をお預かりし、白い靴下に履き替えていただきます。</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <span class="timeline-time"><time datetime="13:00">13:00</time></span>
+            <div class="timeline-body">
+              <h3>はじめのご挨拶</h3>
+              <p>今日の掛物・花・茶碗について、五分ほどお話しします。ここで作法の要点もお伝えします。</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <span class="timeline-time"><time datetime="13:20">13:20</time></span>
+            <div class="timeline-body">
+              <h3>主菓子</h3>
+              <p>季節の生菓子をお出しします。抹茶より先に、菓子をすべていただくのがこの会の流れです。</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <span class="timeline-time"><time datetime="13:40">13:40</time></span>
+            <div class="timeline-body">
+              <h3>お点前・薄茶</h3>
+              <p>亭主が一碗ずつ点てます。順に回りますので、ご自分の番までは静かにご覧ください。</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <span class="timeline-time"><time datetime="14:30">14:30</time></span>
+            <div class="timeline-body">
+              <h3>拝見・歓談</h3>
+              <p>道具を近くでご覧いただきながら、自由にお話しください。ここからは声を出してかまいません。</p>
+            </div>
+          </li>
+          <li class="timeline-item reveal">
+            <span class="timeline-time"><time datetime="15:00">15:00</time></span>
+            <div class="timeline-body">
+              <h3>お開き</h3>
+              <p>解散です。第二部の受付が15:15から始まりますので、順にお席をお立ちください。</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 会場・アクセス -->
+    <section class="section" id="access">
+      <div class="wrap access-grid">
+        <div class="access-info reveal">
+          <p class="section-eyebrow">Access</p>
+          <h2 class="section-title">会場・アクセス</h2>
+
+          <dl class="detail-list">
+            <div>
+              <dt>会場</dt>
+              <dd>市民文化会館 2階 和室「松風」</dd>
+            </div>
+            <div>
+              <dt>最寄り</dt>
+              <dd>地下鉄「中央公園」駅 3番出口より徒歩 6分</dd>
+            </div>
+            <div>
+              <dt>駐車場</dt>
+              <dd>会館地下に有料駐車場あり（30台・2時間まで無料）</dd>
+            </div>
+            <div>
+              <dt>設備</dt>
+              <dd>エレベーターあり。正座が難しい方には座椅子をご用意します。</dd>
+            </div>
+          </dl>
+
+          <p class="note">
+            ※ 和室の入口は少し分かりにくい場所にあります。当日12:30以降、2階の階段前に案内の者が立っています。
+          </p>
+        </div>
+
+        <figure class="access-map reveal" aria-label="会場周辺の簡略地図">
+          <svg viewBox="0 0 400 320" role="img" aria-label="中央公園駅から市民文化会館までの簡略図">
+            <rect width="400" height="320" fill="var(--map-bg)"/>
+            <path d="M0 210 H400" stroke="var(--map-road)" stroke-width="22" fill="none"/>
+            <path d="M150 0 V320" stroke="var(--map-road)" stroke-width="16" fill="none"/>
+            <path d="M150 210 H300 V90" stroke="var(--map-route)" stroke-width="4" stroke-dasharray="9 7" fill="none" stroke-linecap="round"/>
+            <circle cx="150" cy="210" r="11" fill="var(--map-pin-alt)"/>
+            <rect x="272" y="62" width="56" height="44" rx="4" fill="var(--map-pin)"/>
+            <text x="150" y="246" text-anchor="middle" class="map-label">中央公園駅</text>
+            <text x="300" y="128" text-anchor="middle" class="map-label">市民文化会館</text>
+            <text x="228" y="200" text-anchor="middle" class="map-label map-label-sm">徒歩 6分</text>
+          </svg>
+          <figcaption>※ 実際の位置関係を簡略化した図です。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section section-alt" id="faq">
+      <div class="wrap wrap-narrow">
+        <header class="section-head reveal">
+          <p class="section-eyebrow">FAQ</p>
+          <h2 class="section-title">よくある質問</h2>
+        </header>
+
+        <div class="faq-list">
+          <details class="faq-item reveal">
+            <summary>ひとりで参加しても浮きませんか？</summary>
+            <p>毎回半分ほどの方がおひとりでいらっしゃいます。席順はこちらで決めますので、知り合いがいなくても困ることはありません。</p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>正座がどうしても苦手です。</summary>
+            <p>座椅子と正座椅子を用意しています。申し込みフォームの備考欄に一言いただければ、その席をご用意しておきます。</p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>子どもを連れて行けますか？</summary>
+            <p>小学生以上のお子さまでしたら一緒にご参加いただけます。参加費はお一人分として数えてください。それより小さいお子さまは、静かな時間が長いため次回以降をおすすめしています。</p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>食物アレルギーがあります。</summary>
+            <p>主菓子には小豆・卵・小麦を使う場合があります。申し込み時にお知らせいただければ、代替の菓子をご用意します（一週間前までにご連絡ください）。</p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>キャンセルはできますか？</summary>
+            <p>三日前までは無料です。それ以降は菓子の手配の都合で参加費を頂戴しています。ご連絡だけは必ずお願いします。</p>
+          </details>
+          <details class="faq-item reveal">
+            <summary>写真を撮ってもいいですか？</summary>
+            <p>お点前の間はご遠慮ください。14:30からの拝見・歓談の時間は自由に撮影いただけます。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 参加申し込み -->
+    <section class="section" id="rsvp">
+      <div class="wrap wrap-narrow">
+        <header class="section-head reveal">
+          <p class="section-eyebrow">RSVP</p>
+          <h2 class="section-title">参加申し込み</h2>
+          <p class="section-lead">
+            下のフォームからお申し込みください。折り返し、当日のご案内をお送りします。
+            定員に達している場合はキャンセル待ちとしてご連絡します。
+          </p>
+        </header>
+
+        <form class="rsvp-form reveal" id="rsvpForm" novalidate>
+          <div class="field">
+            <label for="name">お名前 <span class="required">必須</span></label>
+            <input type="text" id="name" name="name" autocomplete="name" required>
+            <p class="error" data-error-for="name" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="kana">ふりがな</label>
+            <input type="text" id="kana" name="kana" placeholder="やまだ はなこ">
+            <p class="error" data-error-for="kana" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="email">メールアドレス <span class="required">必須</span></label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+            <p class="hint">当日のご案内をこの宛先にお送りします。</p>
+            <p class="error" data-error-for="email" role="alert"></p>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="party">参加人数 <span class="required">必須</span></label>
+              <input type="number" id="party" name="party" min="1" max="4" value="1" required>
+              <p class="hint">お一人につき最大4名まで。</p>
+              <p class="error" data-error-for="party" role="alert"></p>
+            </div>
+
+            <div class="field">
+              <label for="session">ご希望の部 <span class="required">必須</span></label>
+              <select id="session" name="session" required>
+                <option value="">選択してください</option>
+                <option value="第一部 13:00-15:00">第一部　13:00 〜 15:00</option>
+                <option value="第二部 15:30-17:30">第二部　15:30 〜 17:30</option>
+                <option value="どちらでも可">どちらでも可</option>
+              </select>
+              <p class="error" data-error-for="session" role="alert"></p>
+            </div>
+          </div>
+
+          <fieldset class="field">
+            <legend>お茶の経験</legend>
+            <div class="radio-group">
+              <label class="radio"><input type="radio" name="experience" value="はじめて" checked><span>はじめて</span></label>
+              <label class="radio"><input type="radio" name="experience" value="数回ある"><span>数回ある</span></label>
+              <label class="radio"><input type="radio" name="experience" value="稽古している"><span>稽古している</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="notes">備考</label>
+            <textarea id="notes" name="notes" rows="4" placeholder="アレルギー、正座が難しい、車椅子で伺う など"></textarea>
+            <p class="hint">アレルギーや席のご希望があればこちらへ。</p>
+          </div>
+
+          <label class="checkbox">
+            <input type="checkbox" id="agree" name="agree" required>
+            <span>キャンセル規定（三日前まで無料）に同意します <span class="required">必須</span></span>
+          </label>
+          <p class="error" data-error-for="agree" role="alert"></p>
+
+          <button class="btn btn-primary btn-block" type="submit">この内容で申し込む</button>
+          <p class="form-note">
+            ※ このサイトはデモ用のため、送信内容はお使いのブラウザ内に保存されるだけで、どこにも送信されません。
+          </p>
+        </form>
+
+        <div class="rsvp-success" id="rsvpSuccess" hidden tabindex="-1">
+          <h3>お申し込みを受け付けました</h3>
+          <p>以下の内容で承りました。折り返しご案内をお送りします。</p>
+          <dl class="summary" id="rsvpSummary"></dl>
+          <button class="btn btn-ghost" type="button" id="rsvpReset">別の内容で申し込み直す</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" aria-hidden="true">茶</span>
+        <p>季節ごとに開いている、小さなお茶会です。</p>
+      </div>
+      <nav class="footer-nav" aria-label="フッターナビゲーション">
+        <ul>
+          <li><a href="#about">お茶会について</a></li>
+          <li><a href="#flow">当日の流れ</a></li>
+          <li><a href="#access">会場・アクセス</a></li>
+          <li><a href="#faq">よくある質問</a></li>
+          <li><a href="#rsvp">参加申し込み</a></li>
+        </ul>
+      </nav>
+      <p class="footer-copy">© <span id="year">2026</span> otyakai</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
