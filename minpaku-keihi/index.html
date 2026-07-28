@@ -195,11 +195,15 @@
       <input type="date" id="date">
     </div>
     <div class="field" id="roomField" style="display:none;">
-      <label>③ 部屋を選ぶ</label>
+      <label id="roomLabel">③ 部屋を選ぶ</label>
       <div class="rooms" id="rooms"></div>
     </div>
+    <div class="field" id="feeField" style="display:none;">
+      <label for="fee" id="feeLabel">③ 作業料</label>
+      <input type="number" id="fee" inputmode="numeric" min="0">
+    </div>
     <div class="field" id="reimbField" style="display:none;">
-      <label for="reimb">③ 立替額（買い物で払った金額）</label>
+      <label for="reimb" id="reimbLabel">④ 立替額（自分で払った実費）</label>
       <input type="number" id="reimb" inputmode="numeric" placeholder="例：2340" min="0">
     </div>
     <div class="field">
@@ -285,6 +289,8 @@
   var elMonth=$("month"),elRecipient=$("recipient"),elStaff=$("staff");
   var elRangeStart=$("rangeStart"),elRangeEnd=$("rangeEnd");
   var elDate=$("date"),elReimb=$("reimb"),elContent=$("content");
+  var elFee=$("fee"),elFeeField=$("feeField"),elFeeLabel=$("feeLabel");
+  var elRoomLabel=$("roomLabel"),elReimbLabel=$("reimbLabel");
   var elFeeNote=$("feeNote"),elRoomField=$("roomField"),elRooms=$("rooms"),elReimbField=$("reimbField");
   var elAddBtn=$("addBtn"),elList=$("list"),elTotals=$("totals");
   var elTFee=$("tFee"),elTReimb=$("tReimb"),elTGrand=$("tGrand");
@@ -345,6 +351,13 @@
     if(g)return g.label;
     return e.genre==="cleaning"?"掃除点検":e.genre==="shopping"?"買い物":"その他";
   }
+  // 立替（実費）を扱う種類かどうか。
+  // 種類を消したあとの古い記録は、立替が入っていれば立替ありとして扱う
+  function hasReimb(e){
+    var g=findGenre(e.genre);
+    if(g)return !!g.reimb;
+    return e.genre==="shopping"||Number(e.reimb)>0;
+  }
   function renderGenres(){
     var el=document.getElementById("genres"),h="";
     allGenres().forEach(function(g){
@@ -374,7 +387,14 @@
     elRooms.appendChild(b);
   });
 
-  function feeNow(){var g=findGenre(state.genre);return g?g.fee:0;}
+  // 立替ありの種類は作業料も画面で直せる。空にしたら種類の既定額に戻す
+  function feeNow(){
+    var g=findGenre(state.genre);
+    if(!g)return 0;
+    if(!g.reimb)return g.fee;
+    var v=parseInt(elFee.value,10);
+    return isNaN(v)||v<0?g.fee:v;
+  }
   function reimbNow(){var v=parseInt(elReimb.value,10);return isNaN(v)||v<0?0:v;}
   function canAdd(){
     if(!state.genre)return false;
@@ -386,13 +406,22 @@
   function sorted(){return entries().slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");});}
   function totalsOf(a){var f=0,r=0;a.forEach(function(e){f+=Number(e.fee)||0;r+=Number(e.reimb)||0;});return{fee:f,reimb:r,grand:f+r};}
 
+  var STEPS=["①","②","③","④","⑤","⑥"];
   function renderForm(){
     renderGenres();
     var g=findGenre(state.genre);
     if(g){elFeeNote.style.display="block";elFeeNote.textContent="作業料 ¥"+yen(g.fee)+(g.reimb?"（＋立替）":"");}
     else elFeeNote.style.display="none";
     elRoomField.style.display=(g&&g.room)?"block":"none";
+    elFeeField.style.display=(g&&g.reimb)?"block":"none";
     elReimbField.style.display=(g&&g.reimb)?"block":"none";
+    // 部屋・作業料・立替は組み合わせが変わるので、見出しの番号は出ている欄だけで振り直す
+    var n=2;
+    if(g&&g.room)elRoomLabel.textContent=STEPS[n++]+" 部屋を選ぶ";
+    if(g&&g.reimb){
+      elFeeLabel.textContent=STEPS[n++]+" 作業料（変えられます）";
+      elReimbLabel.textContent=STEPS[n++]+" 立替額（自分で払った実費）";
+    }
     document.querySelectorAll(".room").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-room")===state.room);});
     elAddBtn.disabled=!canAdd();
   }
@@ -406,17 +435,18 @@
     var html="";
     a.forEach(function(e){
       var gl=genreLabelOf(e);
-      var cls=e.genre==="cleaning"?"c":e.genre==="shopping"?"s":"o";
+      var cls=e.genre==="cleaning"?"c":hasReimb(e)?"s":"o";
       var tag='<span class="tag '+cls+'">'+esc(gl)+'</span>';
       var title=e.room?esc(e.room):(e.content?esc(e.content):esc(gl));
       var note=(e.room&&e.content)?'<div class="note">'+esc(e.content)+'</div>':'';
+      var reimbable=hasReimb(e);
       var photo="";
-      if(e.genre==="shopping"){
+      if(reimbable){
         var thumb=photos[e.id]?'<img class="thumb" src="'+photos[e.id]+'" alt="">':'';
         var lbl=photos[e.id]?"写真を変更":"レシート写真";
         photo='<div class="photoctrl">'+thumb+'<button class="photobtn" data-photo="'+e.id+'">'+lbl+'</button></div>';
       }
-      var amt=e.genre==="shopping"
+      var amt=reimbable
         ?'<div class="amt">¥'+yen(e.fee)+'<span>立替 ¥'+yen(e.reimb)+'</span></div>'
         :'<div class="amt">¥'+yen(e.fee)+'</div>';
       var editing=(state.editingId===e.id)?" editing":"";
@@ -462,7 +492,7 @@
     var rows="";
     a.forEach(function(e){
       var gl=genreLabelOf(e);
-      var ccls=e.genre==="cleaning"?"clean":e.genre==="shopping"?"buy":"other";
+      var ccls=e.genre==="cleaning"?"clean":hasReimb(e)?"buy":"other";
       var chip='<span class="r-chip '+ccls+'">'+esc(gl)+'</span>';
       var detail=e.room?(esc(e.room)+(e.content?" / "+esc(e.content):"")):(e.content?esc(e.content):esc(gl));
       var reimb=e.reimb>0?"¥"+yen(e.reimb):'<span class="r-dash">—</span>';
@@ -472,17 +502,17 @@
     var bank=elBank.value.trim();
     var bankBlock=bank?'<div class="r-bank"><div class="h">振込先</div><pre>'+esc(bank)+'</pre></div>':'';
 
-    // レシート添付（写真がある買い物のみ）
-    var withPhoto=a.filter(function(e){return e.genre==="shopping"&&photos[e.id];});
+    // レシート添付（写真がある記録すべて。買い物に限らない）
+    var withPhoto=a.filter(function(e){return photos[e.id];});
     var apx="";
     if(withPhoto.length){
       var cards="";
       withPhoto.forEach(function(e){
         cards+='<div class="r-rcol"><div class="r-photo"><img src="'+photos[e.id]+'"></div>'
-             +'<div class="r-rcap"><div class="d">'+fmtDate(e.date)+'　買い物</div>'
+             +'<div class="r-rcap"><div class="d">'+fmtDate(e.date)+'　'+esc(genreLabelOf(e))+'</div>'
              +'<div class="s">立替 ¥'+yen(e.reimb)+'（作業料込 ¥'+yen(Number(e.fee)+(Number(e.reimb)||0))+'）</div></div></div>';
       });
-      apx='<div class="r-apx-h">■ 添付レシート（買い物分）</div><div class="r-receipts">'+cards+'</div>';
+      apx='<div class="r-apx-h">■ 添付レシート（立替分）</div><div class="r-receipts">'+cards+'</div>';
     }
 
     var staff=esc(elStaff.value.trim()||"ミント");
@@ -517,6 +547,7 @@
     elDate.value=e.date||"";
     elContent.value=e.content||"";
     elReimb.value=e.reimb>0?String(e.reimb):"";
+    elFee.value=String(Number(e.fee)||0);
     elAddBtn.textContent="記録を更新";
     elCancelEdit.style.display="block";
     elEditNote.style.display="block";
@@ -527,7 +558,7 @@
   function clearEdit(){
     state.editingId=null;
     state.genre=null;state.room="";
-    elReimb.value="";elContent.value="";
+    elReimb.value="";elFee.value="";elContent.value="";
     elAddBtn.textContent="記録を追加";
     elCancelEdit.style.display="none";
     elEditNote.style.display="none";
@@ -595,9 +626,10 @@
       if(feeStr===null)return;
       var fee=parseInt(String(feeStr).replace(/[^0-9]/g,""),10);
       if(isNaN(fee)||fee<0){window.alert("金額は数字で入れてください");return;}
+      var needReimb=window.confirm("「"+name+"」は立替（自分で払った実費）も記録しますか？\nOK＝作業料と立替の両方を入力する（レシート写真も付けられます）／キャンセル＝作業料だけ");
       var needRoom=window.confirm("「"+name+"」は部屋（マンション）も選ぶ種類にしますか？\nOK＝部屋を選ぶ／キャンセル＝選ばない");
       var customs=loadGenresCustom();
-      customs.push({key:"g"+Date.now(),label:name,fee:fee,room:needRoom});
+      customs.push({key:"g"+Date.now(),label:name,fee:fee,room:needRoom,reimb:needReimb});
       saveGenresCustom(customs);
       renderForm();
       return;
@@ -608,6 +640,9 @@
     state.genre=(state.genre===gk)?null:gk;
     var gg=findGenre(state.genre);
     if(!(gg&&gg.room))state.room="";
+    // 種類ごとに作業料が違うので、選び直したらその種類の既定額を入れ直す。
+    // renderForm で毎回入れ直すと、欄を消して打ち直せなくなるのでここだけで行う
+    elFee.value=(gg&&gg.reimb)?String(gg.fee):"";
     renderForm();
   });
   elRooms.addEventListener("click",function(ev){
@@ -642,7 +677,7 @@
         room:(g&&g.room)?state.room:"",content:elContent.value.trim(),
         fee:feeNow(),reimb:(g&&g.reimb)?reimbNow():0});
       setEntries(a);
-      state.genre=null;state.room="";elReimb.value="";elContent.value="";
+      state.genre=null;state.room="";elReimb.value="";elFee.value="";elContent.value="";
     }
     renderForm();renderList();
   });
@@ -767,7 +802,7 @@
     state.month=elMonth.value||thisMonth();
     if(!elMonth.value)elMonth.value=state.month; // 月を空にされたときも表示と中身を合わせる
     refreshNextId();
-    state.genre=null;state.room="";elReimb.value="";elContent.value="";
+    state.genre=null;state.room="";elReimb.value="";elFee.value="";elContent.value="";
     applyRangeForMonth();
     // ② 日付を選択中の月に合わせる（今月なら今日、他の月なら1日）
     if((elDate.value||"").slice(0,7)!==state.month){
