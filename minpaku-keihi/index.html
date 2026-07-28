@@ -38,6 +38,9 @@
   .pick.on .gfee{color:#d7f2e2;}
   .pick .gdel{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:99px;
     background:#fff;border:1px solid #f0c7c7;color:var(--red);font-size:.8rem;font-weight:800;line-height:20px;text-align:center;}
+  /* ✕ の左隣に置く。左端に出すと隣のカードの ✕ と重なって押し間違える */
+  .pick .gedit{position:absolute;top:-7px;right:20px;width:22px;height:22px;border-radius:99px;
+    background:#fff;border:1px solid #bbf0d1;color:var(--indigo-d);font-size:.72rem;font-weight:800;line-height:20px;text-align:center;}
   .pick-add{padding:13px 8px;font-size:.9rem;font-weight:700;border:1.5px dashed #b9c0cf;
     border-radius:10px;background:#fafbfd;color:var(--sub);cursor:pointer;min-height:48px;}
   .rooms{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -366,7 +369,8 @@
       h+='<button type="button" class="pick'+(state.genre===g.key?" on":"")+'" data-genre="'+esc(g.key)+'">'
         +icon+esc(g.label)
         +'<span class="gfee">¥'+yen(g.fee)+(g.reimb?"＋立替":"")+'</span>'
-        +(custom?'<span class="gdel" data-gdel="'+esc(g.key)+'">✕</span>':'')
+        +(custom?'<span class="gedit" data-gedit="'+esc(g.key)+'" title="この種類を直す">✎</span>':'')
+        +(custom?'<span class="gdel" data-gdel="'+esc(g.key)+'" title="この種類を消す">✕</span>':'')
         +'</button>';
     });
     h+='<button type="button" class="pick-add" id="genreAdd">＋ 種類を追加</button>';
@@ -602,6 +606,33 @@
     legacy();
   }
 
+  // 種類の追加と修正で同じ聞き方をする。cur を渡すと今の内容が初期値に入る。
+  // 取りやめたときは null を返す
+  function askGenre(cur){
+    var name=window.prompt(cur?"種類の名前":"追加する種類の名前（例：ゴミ出し）",cur?cur.label:"");
+    if(name===null)return null;
+    name=name.trim();
+    if(!name)return null;
+    var dup=allGenres().some(function(x){return x.label===name&&(!cur||x.key!==cur.key);});
+    if(dup){window.alert("同じ名前の種類がすでにあります");return null;}
+    var feeStr=window.prompt("「"+name+"」の作業料（円・数字だけ）",cur?String(cur.fee):"1000");
+    if(feeStr===null)return null;
+    var fee=parseInt(String(feeStr).replace(/[^0-9]/g,""),10);
+    if(isNaN(fee)||fee<0){window.alert("金額は数字で入れてください");return null;}
+    var reimb=window.confirm("「"+name+"」は立替（自分で払った実費）も記録しますか？\nOK＝作業料と立替の両方を入力する（レシート写真も付けられます）／キャンセル＝作業料だけ");
+    var room=window.confirm("「"+name+"」は部屋（マンション）も選ぶ種類にしますか？\nOK＝部屋を選ぶ／キャンセル＝選ばない");
+    return {label:name,fee:fee,room:room,reimb:reimb};
+  }
+  // 種類の名前を変えたら、その種類で入れた過去の記録の表示名も合わせる
+  function relabelEntries(key,label){
+    var all=loadAll(),hit=false;
+    Object.keys(all).forEach(function(m){
+      if(Object.prototype.toString.call(all[m])!=="[object Array]")return;
+      all[m].forEach(function(e){if(e.genre===key&&e.glabel!==label){e.glabel=label;hit=true;}});
+    });
+    if(hit)saveAll(all);
+  }
+
   // ===== events =====
   document.getElementById("genres").addEventListener("click",function(ev){
     var del=ev.target.closest(".gdel");
@@ -616,20 +647,30 @@
       }
       return;
     }
+    var edt=ev.target.closest(".gedit");
+    if(edt){
+      ev.stopPropagation();
+      var ekey=edt.getAttribute("data-gedit");
+      var eg=findGenre(ekey);
+      if(!eg)return;
+      var v=askGenre(eg);
+      if(!v)return;
+      saveGenresCustom(loadGenresCustom().map(function(x){
+        return x.key===ekey?{key:ekey,label:v.label,fee:v.fee,room:v.room,reimb:v.reimb}:x;
+      }));
+      relabelEntries(ekey,v.label);
+      if(state.genre===ekey){
+        elFee.value=v.reimb?String(v.fee):"";
+        if(!v.room)state.room="";
+      }
+      renderForm();renderList();
+      return;
+    }
     if(ev.target.closest("#genreAdd")){
-      var name=window.prompt("追加する種類の名前（例：ゴミ出し）");
-      if(!name)return;
-      name=name.trim();
-      if(!name)return;
-      if(allGenres().some(function(x){return x.label===name;})){window.alert("同じ名前の種類がすでにあります");return;}
-      var feeStr=window.prompt("「"+name+"」の作業料（円・数字だけ）","1000");
-      if(feeStr===null)return;
-      var fee=parseInt(String(feeStr).replace(/[^0-9]/g,""),10);
-      if(isNaN(fee)||fee<0){window.alert("金額は数字で入れてください");return;}
-      var needReimb=window.confirm("「"+name+"」は立替（自分で払った実費）も記録しますか？\nOK＝作業料と立替の両方を入力する（レシート写真も付けられます）／キャンセル＝作業料だけ");
-      var needRoom=window.confirm("「"+name+"」は部屋（マンション）も選ぶ種類にしますか？\nOK＝部屋を選ぶ／キャンセル＝選ばない");
+      var nv=askGenre(null);
+      if(!nv)return;
       var customs=loadGenresCustom();
-      customs.push({key:"g"+Date.now(),label:name,fee:fee,room:needRoom,reimb:needReimb});
+      customs.push({key:"g"+Date.now(),label:nv.label,fee:nv.fee,room:nv.room,reimb:nv.reimb});
       saveGenresCustom(customs);
       renderForm();
       return;
