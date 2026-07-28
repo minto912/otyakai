@@ -686,6 +686,16 @@
 
   // ===== バックアップ =====
   function bkMsg(t){elBkNote.textContent=t;setTimeout(function(){elBkNote.textContent="";},3000);}
+  // 古いバックアップは月ごとに id が 1 から振り直されている。そのまま戻すと
+  // 別の月の記録にレシート写真が付いてしまうので、全部の月で通し番号にする
+  function renumber(records){
+    var n=1;
+    Object.keys(records).forEach(function(m){
+      if(Object.prototype.toString.call(records[m])!=="[object Array]")return;
+      records[m].forEach(function(e){if(e&&typeof e==="object")e.id=n++;});
+    });
+    return records;
+  }
   elBackup.addEventListener("click",function(){
     var data={
       app:"minpaku-keihi",version:1,savedAt:todayISO(),
@@ -716,7 +726,7 @@
       var months=Object.keys(d.records).length;
       if(!window.confirm("バックアップ（保存日: "+(d.savedAt||"不明")+" / "+months+"か月分）を復元します。\n今この端末にある記録は上書きされます。よろしいですか？"))return;
       try{
-        localStorage.setItem(STORE_KEY,JSON.stringify(d.records||{}));
+        localStorage.setItem(STORE_KEY,JSON.stringify(renumber(d.records||{})));
         localStorage.setItem(BANK_KEY,d.bank||"");
         localStorage.setItem(META_KEY,JSON.stringify(d.meta||{}));
         localStorage.setItem(GENRE_KEY,JSON.stringify(d.genres||[]));
