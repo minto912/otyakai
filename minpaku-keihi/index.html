@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>民泊 経費精算</title>
+<style>
+  :root{
+    --bg:#f4f5f8; --card:#fff; --ink:#1f2433; --sub:#6b7280; --line:#e3e6ee;
+    --indigo:#15803d; --indigo-d:#14532d; --teal:#0d9488; --teal-d:#0f766e;
+    --green:#22c55e; --green-bg:#dcfce7; --red:#dc2626;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0 auto;max-width:560px;padding:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Noto Sans JP",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;}
+  h1{font-size:1.25rem;margin:4px 0 2px;}
+  .sub{color:var(--sub);font-size:.85rem;margin:0 0 16px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .card-h{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:800;color:var(--indigo-d);margin:0 0 14px;}
+  .card-h svg{flex:0 0 auto;width:19px;height:19px;stroke:var(--indigo);}
+  .pick svg{width:16px;height:16px;vertical-align:-3px;margin-right:5px;stroke:currentColor;}
+  label{display:block;font-size:.82rem;color:var(--sub);font-weight:600;margin:0 0 6px;}
+  .field{margin-bottom:14px;}
+  .field.last{margin-bottom:0;}
+  input,textarea{width:100%;font-size:1rem;padding:11px 12px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);font-family:inherit;}
+  textarea{resize:vertical;min-height:84px;line-height:1.5;}
+  input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--indigo);outline-offset:1px;}
+  .two{display:flex;gap:10px;}
+  .two>div{flex:1;}
+  .btn-row{display:flex;gap:8px;}
+  .genres{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .pick{position:relative;padding:13px 8px;font-size:.98rem;font-weight:700;border:1.5px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:.12s;min-height:48px;}
+  .pick.on{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .pick .gfee{display:block;font-size:.68rem;font-weight:600;color:var(--sub);margin-top:1px;}
+  .pick.on .gfee{color:#d7f2e2;}
+  .pick .gdel{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:99px;
+    background:#fff;border:1px solid #f0c7c7;color:var(--red);font-size:.8rem;font-weight:800;line-height:20px;text-align:center;}
+  .pick-add{padding:13px 8px;font-size:.9rem;font-weight:700;border:1.5px dashed #b9c0cf;
+    border-radius:10px;background:#fafbfd;color:var(--sub);cursor:pointer;min-height:48px;}
+  .rooms{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .room{padding:12px 6px;font-size:.95rem;font-weight:700;text-align:center;border:1.5px solid var(--line);
+    border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;transition:.12s;min-height:54px;
+    display:flex;flex-direction:column;justify-content:center;}
+  .room small{display:block;font-weight:400;font-size:.68rem;color:var(--sub);margin-top:2px;}
+  .room.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .room.on small{color:#eafaf0;}
+  .fee-note{font-size:.9rem;color:var(--teal);font-weight:700;margin:-4px 0 14px;}
+  .add{width:100%;padding:14px;font-size:1.05rem;font-weight:800;background:var(--indigo);color:#fff;
+    border:none;border-radius:12px;cursor:pointer;min-height:52px;}
+  .add:disabled{background:#c7c9d3;cursor:not-allowed;}
+  .add:not(:disabled):active{background:var(--indigo-d);}
+  .list-empty{color:var(--sub);font-size:.9rem;text-align:center;padding:14px 0;}
+  .row{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);}
+  .row:first-child{border-top:none;}
+  .row .meta{flex:1;min-width:0;}
+  .row .top{font-weight:700;font-size:.95rem;}
+  .tag{font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:99px;margin-right:6px;vertical-align:1px;}
+  .tag.c{background:var(--green-bg);color:var(--indigo-d);}
+  .tag.s{background:#ccfbf1;color:#0f766e;}
+  .tag.o{background:#f1f2f6;color:#4a5163;}
+  .row .note{font-size:.78rem;color:var(--sub);}
+  .row .photoctrl{margin-top:5px;display:flex;align-items:center;gap:8px;}
+  .row .photobtn{font-size:.72rem;font-weight:700;color:var(--indigo-d);background:var(--green-bg);
+    border:1px solid #bbf0d1;border-radius:8px;padding:4px 9px;cursor:pointer;}
+  .row .thumb{width:30px;height:30px;border-radius:6px;object-fit:cover;border:1px solid var(--line);}
+  .row .amt{font-weight:800;font-size:.95rem;white-space:nowrap;text-align:right;}
+  .row .amt span{display:block;font-size:.7rem;font-weight:600;color:var(--sub);}
+  .del{border:none;background:none;color:var(--red);font-size:.78rem;font-weight:700;cursor:pointer;padding:6px;flex:0 0 auto;}
+  .edit{border:none;background:none;color:var(--indigo-d);font-size:.78rem;font-weight:700;cursor:pointer;padding:6px;flex:0 0 auto;}
+  .row.editing{background:#f0faf4;border-radius:10px;margin:0 -8px;padding-left:8px;padding-right:8px;}
+  .cancel-edit{width:100%;padding:10px;font-size:.85rem;font-weight:700;background:#fff;color:var(--sub);
+    border:1px solid var(--line);border-radius:10px;cursor:pointer;margin-top:8px;}
+  .edit-note{font-size:.78rem;color:var(--indigo-d);font-weight:700;margin:0 0 10px;display:none;}
+  .totals{margin-top:6px;padding-top:12px;border-top:2px solid var(--ink);}
+  .t-line{display:flex;justify-content:space-between;font-size:.9rem;margin:3px 0;color:var(--sub);}
+  .t-line.grand{font-size:1.15rem;font-weight:800;color:var(--ink);margin-top:8px;}
+  .t-line.grand .v{color:var(--teal);}
+  .save-note{font-size:.72rem;color:var(--green);font-weight:700;margin-top:8px;height:1em;}
+  .pdf{width:100%;padding:14px;font-size:1.02rem;font-weight:800;background:var(--indigo);color:#fff;
+    border:none;border-radius:12px;cursor:pointer;min-height:52px;margin-bottom:10px;}
+  .pdf:disabled{background:#c7c9d3;cursor:not-allowed;}
+  .pdf:not(:disabled):active{background:var(--indigo-d);}
+  .copy{width:100%;padding:14px;font-size:1.02rem;font-weight:800;background:var(--teal);color:#fff;
+    border:none;border-radius:12px;cursor:pointer;min-height:52px;margin-bottom:10px;}
+  .copy:disabled{background:#c7c9d3;cursor:not-allowed;}
+  .clear{width:100%;padding:11px;font-size:.85rem;font-weight:700;background:#fff;color:var(--red);
+    border:1px solid #f0c7c7;border-radius:10px;cursor:pointer;}
+  .bk{width:100%;padding:13px;font-size:.95rem;font-weight:800;background:#fff;color:var(--indigo-d);
+    border:1.5px solid var(--indigo);border-radius:12px;cursor:pointer;min-height:48px;margin-bottom:10px;}
+  .bk:active{background:#f0faf4;}
+  .bk.sub{border:1.5px solid var(--line);color:var(--sub);font-weight:700;margin-bottom:0;}
+  .hint{font-size:.74rem;color:var(--sub);margin-top:10px;text-align:center;}
+  .warn{font-size:.74rem;color:#9a6a00;background:#fff7e6;border:1px solid #ffe6b0;border-radius:8px;padding:8px 10px;margin-top:8px;}
+
+  /* ===== 精算書（印刷=PDF）レイアウト ===== */
+  #report{display:none;}
+  @media print{
+    /* 余白は @page 側で持つ。2ページ目以降にも同じ余白が付く */
+    @page{ size:A4; margin:15mm 14mm; }
+    body{max-width:none;padding:0;background:#fff;}
+    body > *{display:none !important;}
+    body > #report{display:block !important;}
+    /* 背景色（区分チップ・合計欄）を印刷でも落とさない */
+    #report{font-family:"Noto Sans CJK JP","Hiragino Sans","Yu Gothic UI",sans-serif;color:#1f2330;
+      -webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .r-wrap{width:auto;padding:0;}
+    .r-head{display:flex;justify-content:space-between;align-items:flex-end;}
+    .r-ttl{font-size:21px;font-weight:900;}
+    .r-month{font-size:11px;color:#7b8090;margin-top:3px;}
+    .r-meta{font-size:10px;color:#6b7180;text-align:right;line-height:1.7;}
+    .r-rule{height:2px;background:#1f2330;margin:10px 0 14px;}
+    .r-lead{font-size:11px;color:#333a48;margin-bottom:14px;}
+    table.r-main{width:100%;border-collapse:collapse;font-size:11px;}
+    /* 記録が多くて複数ページになっても、見出し行を各ページに繰り返す */
+    table.r-main thead{display:table-header-group;}
+    table.r-main tr{break-inside:avoid;page-break-inside:avoid;}
+    table.r-main thead th{background:#eceff7;color:#4a5163;font-weight:700;font-size:10px;padding:8px 10px;text-align:left;border-bottom:1px solid #d3d9e6;}
+    table.r-main thead th.num{text-align:right;}
+    table.r-main tbody td{padding:9px 10px;border-bottom:1px solid #e8ebf2;}
+    table.r-main tbody tr:nth-child(even) td{background:#fafbfd;}
+    .r-num{text-align:right;white-space:nowrap;}
+    .r-tot{font-weight:800;}
+    .r-dash{color:#aab0bd;}
+    .r-chip{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap;}
+    .r-chip.buy{background:#ecdfc2;color:#7c6322;}
+    .r-chip.clean{background:#d6efe6;color:#1d7a64;}
+    .r-chip.other{background:#eceef3;color:#4a5163;}
+    .r-totwrap{display:flex;justify-content:flex-end;margin-top:12px;break-inside:avoid;page-break-inside:avoid;}
+    .r-totbox{width:48%;}
+    .r-totrow{display:flex;justify-content:space-between;font-size:11px;padding:7px 14px;color:#4a5163;}
+    .r-totrow.grand{background:#d6efe9;color:#0c5d52;font-size:14px;font-weight:900;padding:11px 14px;border-radius:4px;margin-top:4px;}
+    .r-totrow.grand .v{color:#0d9488;}
+    .r-bank{margin-top:16px;border:1px solid #d9dde7;border-radius:5px;padding:10px 13px;background:#fafbfd;width:62%;
+      break-inside:avoid;page-break-inside:avoid;}
+    .r-bank .h{font-weight:800;font-size:11px;margin-bottom:3px;}
+    .r-bank pre{margin:0;font-family:inherit;white-space:pre-wrap;font-size:11px;color:#333a48;}
+    .r-apx-h{font-size:11px;font-weight:800;margin:24px 0 10px;color:#2a3142;break-after:avoid;page-break-after:avoid;}
+    .r-receipts{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;}
+    /* レシート1枚が写真と日付でページ分断されないように */
+    .r-rcol{width:calc((100% - 24px)/3);break-inside:avoid;page-break-inside:avoid;}
+    .r-photo{border:1px solid #d9dde7;border-radius:5px;overflow:hidden;background:#fff;}
+    .r-photo img{display:block;width:100%;height:auto;}
+    .r-rcap{text-align:center;margin-top:7px;}
+    .r-rcap .d{font-size:10px;font-weight:800;color:#2a3142;}
+    .r-rcap .s{font-size:9px;color:#7b8090;margin-top:1px;}
+    .r-foot{margin-top:24px;font-size:8.5px;color:#9aa0ac;}
+  }
+</style>
+</head>
+<body>
+
+  <h1>民泊 経費精算</h1>
+  <p class="sub">入力 → ボタンで精算書PDF（ルルさん提出用）</p>
+
+  <div class="card">
+    <div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg>対象期間・宛先</div>
+    <div class="two">
+      <div class="field last">
+        <label for="month">対象の月</label>
+        <input type="month" id="month">
+      </div>
+      <div class="field last">
+        <label for="recipient">宛先</label>
+        <input type="text" id="recipient" placeholder="ルルさん">
+      </div>
+    </div>
+    <div class="two" style="margin-top:14px;">
+      <div class="field last">
+        <label for="rangeStart">対象期間・開始日</label>
+        <input type="date" id="rangeStart">
+      </div>
+      <div class="field last">
+        <label for="rangeEnd">対象期間・終了日</label>
+        <input type="date" id="rangeEnd">
+      </div>
+    </div>
+    <div class="field last" style="margin-top:14px;">
+      <label for="staff">担当（あなたの名前）</label>
+      <input type="text" id="staff" placeholder="ミント">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>記録を追加</div>
+    <div class="field">
+      <label>① 種類を選ぶ</label>
+      <div class="genres" id="genres"></div>
+    </div>
+    <div id="feeNote" class="fee-note" style="display:none;"></div>
+    <div class="field">
+      <label for="date">② 日付</label>
+      <input type="date" id="date">
+    </div>
+    <div class="field" id="roomField" style="display:none;">
+      <label>③ 部屋を選ぶ</label>
+      <div class="rooms" id="rooms"></div>
+    </div>
+    <div class="field" id="reimbField" style="display:none;">
+      <label for="reimb">③ 立替額（買い物で払った金額）</label>
+      <input type="number" id="reimb" inputmode="numeric" placeholder="例：2340" min="0">
+    </div>
+    <div class="field">
+      <label for="content">内容・メモ（任意）</label>
+      <input type="text" id="content" placeholder="買った物 / 補足など">
+    </div>
+    <div class="edit-note" id="editNote"></div>
+    <button class="add" id="addBtn" disabled>記録を追加</button>
+    <button type="button" class="cancel-edit" id="cancelEdit" style="display:none;">編集をやめる</button>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>この月の記録</div>
+    <div id="list"></div>
+    <div class="totals" id="totals" style="display:none;">
+      <div class="t-line"><span>作業料 合計</span><span class="v" id="tFee"></span></div>
+      <div class="t-line"><span>立替 合計</span><span class="v" id="tReimb"></span></div>
+      <div class="t-line grand"><span>総合計</span><span class="v" id="tGrand"></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"></path></svg>振込先（口座情報）</div>
+    <textarea id="bank" placeholder="例：&#10;〇〇銀行 △△支店&#10;普通 1234567&#10;口座名義 ミント タロウ"></textarea>
+    <div class="save-note" id="bankSaved"></div>
+    <p class="hint" style="margin-top:2px;">一度入れれば保存。精算書PDFに入ります。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6M9 15h6M9 11h6"></path></svg>書き出す</div>
+    <button class="pdf" id="pdfBtn" disabled>精算書PDFを作る（印刷 → PDFで保存）</button>
+    <button class="copy" id="copyBtn" disabled>ルルさんに送る文をコピー</button>
+    <button class="clear" id="clearBtn">この月の記録を全部消す</button>
+    <p class="hint">記録・口座・名前は自動保存されます。<br>※レシート写真はこの画面を開いている間だけ保持（保存はされません）。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>バックアップ</div>
+    <button type="button" class="bk" id="backupBtn">バックアップを保存（ファイルに書き出し）</button>
+    <button type="button" class="bk sub" id="restoreBtn">バックアップから復元</button>
+    <div class="save-note" id="bkNote"></div>
+    <p class="hint">全部の月の記録・振込先・種類の設定をファイル1個に保存します。<br>機種変更やデータ消去に備えて、月1回の保存がおすすめ。<br>※レシート写真は含まれません。</p>
+  </div>
+
+  <div id="report"></div>
+  <input type="file" id="photoInput" accept="image/*" style="display:none;">
+  <input type="file" id="restoreInput" accept=".json,application/json" style="display:none;">
+
+<script>
+(function(){
+  "use strict";
+
+  var DEFAULT_GENRES=[
+    {key:"cleaning",label:"掃除点検",fee:1000,room:true},
+    {key:"shopping",label:"買い物",fee:1000,reimb:true},
+    {key:"pickup",label:"荷物受け取り",fee:1000,room:true},
+    {key:"storage",label:"荷物預かり",fee:2000,room:true}
+  ];
+  var GENRE_ICONS={
+    cleaning:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px;"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path></svg>',
+    shopping:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px;"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"></path></svg>',
+    pickup:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px;"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"></path><path d="M3 8l9 5 9-5M12 13v9"></path></svg>',
+    storage:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px;"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path></svg>'
+  };
+  var GENERIC_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:4px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><path d="M7 7h.01"></path></svg>';
+  var ROOMS=[
+    {name:"富士部屋",bldg:"ニューフロンティア"},
+    {name:"桜部屋",bldg:"ニューフロンティア"},
+    {name:"紅葉部屋",bldg:"パークサイド618"},
+    {name:"桜2号",bldg:"サンコート表参道"},
+    {name:"ジブリ部屋",bldg:"サンコート表参道"},
+    {name:"波部屋",bldg:"サンコート南6条壱番館"}
+  ];
+  var STORE_KEY="minpaku_keihi_v1", BANK_KEY="minpaku_bank_v1", META_KEY="minpaku_meta_v1", RANGE_KEY="minpaku_range_v1", GENRE_KEY="minpaku_genres_v1";
+
+  var state={month:"",genre:null,room:"",editingId:null};
+  var nextId=1;
+  var photos={};          // {entryId: dataURL}  ※セッションのみ
+  var photoTargetId=null;
+  window.__photos=photos; // テスト用フック
+
+  var $=function(id){return document.getElementById(id);};
+  var elMonth=$("month"),elRecipient=$("recipient"),elStaff=$("staff");
+  var elRangeStart=$("rangeStart"),elRangeEnd=$("rangeEnd");
+  var elDate=$("date"),elReimb=$("reimb"),elContent=$("content");
+  var elFeeNote=$("feeNote"),elRoomField=$("roomField"),elRooms=$("rooms"),elReimbField=$("reimbField");
+  var elAddBtn=$("addBtn"),elList=$("list"),elTotals=$("totals");
+  var elTFee=$("tFee"),elTReimb=$("tReimb"),elTGrand=$("tGrand");
+  var elBank=$("bank"),elBankSaved=$("bankSaved");
+  var elPdf=$("pdfBtn"),elCopy=$("copyBtn"),elClear=$("clearBtn");
+  var elReport=$("report"),elPhotoInput=$("photoInput");
+  var elCancelEdit=$("cancelEdit"),elEditNote=$("editNote");
+  var elBackup=$("backupBtn"),elRestore=$("restoreBtn"),elRestoreInput=$("restoreInput"),elBkNote=$("bkNote");
+
+  function z(n){return String(n).length<2?"0"+n:""+n;}
+  function todayISO(){var d=new Date();return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate());}
+  function thisMonth(){return todayISO().slice(0,7);}
+  function monthLabel(m){var p=m.split("-");return p[0]+"年"+Number(p[1])+"月";}
+  // 提出日は「精算書を作った日」。以前は対象月の翌月1日を出していたため、
+  // 月末に作ると未来の日付が載っていた
+  function submitDate(){return formatJPDate(todayISO());}
+  function firstDayOfMonth(m){return m+"-01";}
+  function lastDayOfMonth(m){var p=m.split("-"),y=+p[0],mo=+p[1];var d=new Date(y,mo,0).getDate();return m+"-"+z(d);}
+  function formatJPDate(iso){if(!iso)return"";var p=iso.split("-");return Number(p[0])+"年"+Number(p[1])+"月"+Number(p[2])+"日";}
+  function rangeLabel(s,e){
+    if(!s&&!e)return "";
+    if(s===e)return formatJPDate(s);
+    var sp=s.split("-"),ep=e.split("-");
+    if(sp[0]===ep[0]&&sp[1]===ep[1]){ // 同じ年月なら「7月1日〜31日」
+      return Number(sp[0])+"年"+Number(sp[1])+"月"+Number(sp[2])+"日〜"+Number(ep[2])+"日";
+    }
+    return formatJPDate(s)+"〜"+formatJPDate(e);
+  }
+  function fmtDate(iso){if(!iso)return"";var p=iso.split("-");return Number(p[1])+"/"+Number(p[2]);}
+  function yen(n){return(Number(n)||0).toLocaleString("ja-JP");}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+
+  function loadAll(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{};}catch(e){return{};}}
+  function saveAll(o){try{localStorage.setItem(STORE_KEY,JSON.stringify(o));}catch(e){}}
+  function entries(){return loadAll()[state.month]||[];}
+  function setEntries(a){var all=loadAll();all[state.month]=a;saveAll(all);}
+  // idは「全部の月」を通して重複させない。
+  // （月ごとに1から振り直すと、月を切り替えたときに別の月のレシート写真が
+  //   同じidの記録に付いて見えてしまうため）
+  function refreshNextId(){
+    var all=loadAll(),mx=0;
+    Object.keys(all).forEach(function(m){
+      (all[m]||[]).forEach(function(e){if(Number(e.id)>mx)mx=Number(e.id);});
+    });
+    nextId=mx+1;
+  }
+  function loadBank(){try{return localStorage.getItem(BANK_KEY)||"";}catch(e){return"";}}
+  function saveBank(t){try{localStorage.setItem(BANK_KEY,t);}catch(e){}}
+  function loadMeta(){try{return JSON.parse(localStorage.getItem(META_KEY))||{};}catch(e){return{};}}
+  function saveMeta(){try{localStorage.setItem(META_KEY,JSON.stringify({staff:elStaff.value,recipient:elRecipient.value}));}catch(e){}}
+  function loadGenresCustom(){try{return JSON.parse(localStorage.getItem(GENRE_KEY))||[];}catch(e){return[];}}
+  function saveGenresCustom(a){try{localStorage.setItem(GENRE_KEY,JSON.stringify(a));}catch(e){}}
+  function allGenres(){return DEFAULT_GENRES.concat(loadGenresCustom());}
+  function findGenre(key){var g=null;allGenres().forEach(function(x){if(x.key===key)g=x;});return g;}
+  function genreLabelOf(e){
+    if(e.glabel)return e.glabel;
+    var g=findGenre(e.genre);
+    if(g)return g.label;
+    return e.genre==="cleaning"?"掃除点検":e.genre==="shopping"?"買い物":"その他";
+  }
+  function renderGenres(){
+    var el=document.getElementById("genres"),h="";
+    allGenres().forEach(function(g){
+      var icon=GENRE_ICONS[g.key]||GENERIC_ICON;
+      var custom=!DEFAULT_GENRES.some(function(d){return d.key===g.key;});
+      h+='<button type="button" class="pick'+(state.genre===g.key?" on":"")+'" data-genre="'+esc(g.key)+'">'
+        +icon+esc(g.label)
+        +'<span class="gfee">¥'+yen(g.fee)+(g.reimb?"＋立替":"")+'</span>'
+        +(custom?'<span class="gdel" data-gdel="'+esc(g.key)+'">✕</span>':'')
+        +'</button>';
+    });
+    h+='<button type="button" class="pick-add" id="genreAdd">＋ 種類を追加</button>';
+    el.innerHTML=h;
+  }
+  function loadRangeAll(){try{return JSON.parse(localStorage.getItem(RANGE_KEY))||{};}catch(e){return{};}}
+  function saveRange(){try{var all=loadRangeAll();all[state.month]={start:elRangeStart.value,end:elRangeEnd.value};localStorage.setItem(RANGE_KEY,JSON.stringify(all));}catch(e){}}
+  function applyRangeForMonth(){
+    var all=loadRangeAll(), r=all[state.month];
+    if(r&&r.start&&r.end){ elRangeStart.value=r.start; elRangeEnd.value=r.end; }
+    else{ elRangeStart.value=firstDayOfMonth(state.month); elRangeEnd.value=lastDayOfMonth(state.month); saveRange(); }
+  }
+
+  ROOMS.forEach(function(r){
+    var b=document.createElement("button");
+    b.type="button";b.className="room";b.setAttribute("data-room",r.name);
+    b.innerHTML=esc(r.name)+"<small>"+esc(r.bldg)+"</small>";
+    elRooms.appendChild(b);
+  });
+
+  function feeNow(){var g=findGenre(state.genre);return g?g.fee:0;}
+  function reimbNow(){var v=parseInt(elReimb.value,10);return isNaN(v)||v<0?0:v;}
+  function canAdd(){
+    if(!state.genre)return false;
+    if(!elDate.value)return false;
+    var g=findGenre(state.genre);
+    if(g&&g.room&&!state.room)return false;
+    return true;
+  }
+  function sorted(){return entries().slice().sort(function(a,b){return(a.date||"").localeCompare(b.date||"");});}
+  function totalsOf(a){var f=0,r=0;a.forEach(function(e){f+=Number(e.fee)||0;r+=Number(e.reimb)||0;});return{fee:f,reimb:r,grand:f+r};}
+
+  function renderForm(){
+    renderGenres();
+    var g=findGenre(state.genre);
+    if(g){elFeeNote.style.display="block";elFeeNote.textContent="作業料 ¥"+yen(g.fee)+(g.reimb?"（＋立替）":"");}
+    else elFeeNote.style.display="none";
+    elRoomField.style.display=(g&&g.room)?"block":"none";
+    elReimbField.style.display=(g&&g.reimb)?"block":"none";
+    document.querySelectorAll(".room").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-room")===state.room);});
+    elAddBtn.disabled=!canAdd();
+  }
+
+  function renderList(){
+    var a=sorted();
+    if(!a.length){
+      elList.innerHTML='<div class="list-empty">まだ記録がありません</div>';
+      elTotals.style.display="none";elCopy.disabled=true;elPdf.disabled=true;return;
+    }
+    var html="";
+    a.forEach(function(e){
+      var gl=genreLabelOf(e);
+      var cls=e.genre==="cleaning"?"c":e.genre==="shopping"?"s":"o";
+      var tag='<span class="tag '+cls+'">'+esc(gl)+'</span>';
+      var title=e.room?esc(e.room):(e.content?esc(e.content):esc(gl));
+      var note=(e.room&&e.content)?'<div class="note">'+esc(e.content)+'</div>':'';
+      var photo="";
+      if(e.genre==="shopping"){
+        var thumb=photos[e.id]?'<img class="thumb" src="'+photos[e.id]+'" alt="">':'';
+        var lbl=photos[e.id]?"写真を変更":"レシート写真";
+        photo='<div class="photoctrl">'+thumb+'<button class="photobtn" data-photo="'+e.id+'">'+lbl+'</button></div>';
+      }
+      var amt=e.genre==="shopping"
+        ?'<div class="amt">¥'+yen(e.fee)+'<span>立替 ¥'+yen(e.reimb)+'</span></div>'
+        :'<div class="amt">¥'+yen(e.fee)+'</div>';
+      var editing=(state.editingId===e.id)?" editing":"";
+      html+='<div class="row'+editing+'"><div class="meta"><div class="top">'+fmtDate(e.date)+'　'+tag+title+'</div>'+note+photo+'</div>'+amt
+          +'<button class="edit" data-edit="'+e.id+'">編集</button>'
+          +'<button class="del" data-id="'+e.id+'">削除</button></div>';
+    });
+    elList.innerHTML=html;
+    var t=totalsOf(a);
+    elTFee.textContent="¥"+yen(t.fee);elTReimb.textContent="¥"+yen(t.reimb);elTGrand.textContent="¥"+yen(t.grand);
+    elTotals.style.display="block";elCopy.disabled=false;elPdf.disabled=false;
+  }
+
+  function buildText(){
+    var a=sorted(),L=[];
+    var rl=rangeLabel(elRangeStart.value,elRangeEnd.value)||monthLabel(state.month);
+    L.push(rl+" 民泊作業 記録");L.push("");
+    var groups={},order=[];
+    a.forEach(function(e){
+      var gl=genreLabelOf(e);
+      if(!groups[gl]){groups[gl]=[];order.push(gl);}
+      groups[gl].push(e);
+    });
+    order.forEach(function(gl){
+      L.push("【"+gl+"】");
+      groups[gl].forEach(function(e){
+        var body=e.room?e.room+(e.content?"（"+e.content+"）":""):(e.content||gl);
+        if(e.reimb>0){L.push(fmtDate(e.date)+" "+body+" 作業料¥"+yen(e.fee)+" / 立替¥"+yen(e.reimb));}
+        else{L.push(fmtDate(e.date)+" "+body+" ¥"+yen(e.fee));}
+      });
+      L.push("");
+    });
+    var t=totalsOf(a);
+    L.push("────────────");
+    L.push("作業料合計：¥"+yen(t.fee));L.push("立替合計：¥"+yen(t.reimb));L.push("総合計：¥"+yen(t.grand));
+    var bank=elBank.value.trim();
+    if(bank){L.push("");L.push("【振込先】");L.push(bank);}
+    return L.join("\n");
+  }
+
+  function buildReport(){
+    var a=sorted();
+    var rows="";
+    a.forEach(function(e){
+      var gl=genreLabelOf(e);
+      var ccls=e.genre==="cleaning"?"clean":e.genre==="shopping"?"buy":"other";
+      var chip='<span class="r-chip '+ccls+'">'+esc(gl)+'</span>';
+      var detail=e.room?(esc(e.room)+(e.content?" / "+esc(e.content):"")):(e.content?esc(e.content):esc(gl));
+      var reimb=e.reimb>0?"¥"+yen(e.reimb):'<span class="r-dash">—</span>';
+      rows+='<tr><td>'+fmtDate(e.date)+'</td><td>'+chip+'</td><td>'+detail+'</td><td class="r-num">¥'+yen(e.fee)+'</td><td class="r-num">'+reimb+'</td><td class="r-num r-tot">¥'+yen(Number(e.fee)+ (Number(e.reimb)||0))+'</td></tr>';
+    });
+    var t=totalsOf(a);
+    var bank=elBank.value.trim();
+    var bankBlock=bank?'<div class="r-bank"><div class="h">振込先</div><pre>'+esc(bank)+'</pre></div>':'';
+
+    // レシート添付（写真がある買い物のみ）
+    var withPhoto=a.filter(function(e){return e.genre==="shopping"&&photos[e.id];});
+    var apx="";
+    if(withPhoto.length){
+      var cards="";
+      withPhoto.forEach(function(e){
+        cards+='<div class="r-rcol"><div class="r-photo"><img src="'+photos[e.id]+'"></div>'
+             +'<div class="r-rcap"><div class="d">'+fmtDate(e.date)+'　買い物</div>'
+             +'<div class="s">立替 ¥'+yen(e.reimb)+'（作業料込 ¥'+yen(Number(e.fee)+(Number(e.reimb)||0))+'）</div></div></div>';
+      });
+      apx='<div class="r-apx-h">■ 添付レシート（買い物分）</div><div class="r-receipts">'+cards+'</div>';
+    }
+
+    var staff=esc(elStaff.value.trim()||"ミント");
+    var recipient=esc(elRecipient.value.trim()||"ルルさん");
+
+    var rLabel = rangeLabel(elRangeStart.value, elRangeEnd.value) || (monthLabel(state.month)+"分");
+    elReport.innerHTML=
+      '<div class="r-wrap">'
+      +'<div class="r-head"><div><div class="r-ttl">民泊サポート 経費精算書</div>'
+      +'<div class="r-month">'+esc(rLabel)+'</div></div>'
+      +'<div class="r-meta">担当：'+staff+'<br>提出日：'+submitDate()+'<br>宛先：'+recipient+'</div></div>'
+      +'<div class="r-rule"></div>'
+      +'<div class="r-lead">下記のとおり、'+esc(rLabel)+'の作業料および立替金をご精算いただけますようお願いいたします。</div>'
+      +'<table class="r-main"><thead><tr><th style="width:8%">日付</th><th style="width:16%">区分</th><th>部屋／内容</th><th class="num" style="width:14%">作業料</th><th class="num" style="width:13%">立替</th><th class="num" style="width:14%">合計</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'<div class="r-totwrap"><div class="r-totbox">'
+      +'<div class="r-totrow"><span>作業料合計</span><span>¥'+yen(t.fee)+'</span></div>'
+      +'<div class="r-totrow"><span>立替合計</span><span>¥'+yen(t.reimb)+'</span></div>'
+      +'<div class="r-totrow grand"><span>総合計（ご精算額）</span><span class="v">¥'+yen(t.grand)+'</span></div>'
+      +'</div></div>'
+      +bankBlock
+      +apx
+      +'</div>';
+  }
+  window.__buildReport=buildReport; // テスト用フック
+
+  function startEdit(id){
+    var e=null;entries().forEach(function(x){if(x.id===id)e=x;});
+    if(!e)return;
+    state.editingId=id;
+    state.genre=findGenre(e.genre)?e.genre:null; // 種類が削除済みなら選び直してもらう
+    state.room=e.room||"";
+    elDate.value=e.date||"";
+    elContent.value=e.content||"";
+    elReimb.value=e.reimb>0?String(e.reimb):"";
+    elAddBtn.textContent="記録を更新";
+    elCancelEdit.style.display="block";
+    elEditNote.style.display="block";
+    elEditNote.textContent="編集中："+fmtDate(e.date)+" "+genreLabelOf(e)+(e.room?"（"+e.room+"）":"");
+    renderForm();renderList();
+    elEditNote.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+  function clearEdit(){
+    state.editingId=null;
+    state.genre=null;state.room="";
+    elReimb.value="";elContent.value="";
+    elAddBtn.textContent="記録を追加";
+    elCancelEdit.style.display="none";
+    elEditNote.style.display="none";
+  }
+
+  // ===== 画像を縮小して dataURL に =====
+  function scaleTo(src,w0,h0,fallback,cb){
+    var max=1000,w=w0,h=h0;
+    if(w>max||h>max){var s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s);}
+    var cv=document.createElement("canvas");cv.width=w;cv.height=h;
+    cv.getContext("2d").drawImage(src,0,0,w,h);
+    var out;
+    try{out=cv.toDataURL("image/jpeg",0.82);}catch(e){cb(fallback);return;}
+    cb(out);
+  }
+  function readImageScaled(file,cb){
+    // 旧来の経路。createImageBitmap が使えない環境用
+    function legacy(){
+      var fr=new FileReader();
+      fr.onload=function(){
+        var img=new Image();
+        img.onload=function(){scaleTo(img,img.width,img.height,fr.result,cb);};
+        img.onerror=function(){cb(fr.result);};
+        img.src=fr.result;
+      };
+      fr.readAsDataURL(file);
+    }
+    // createImageBitmap なら EXIF の向きを反映できる。
+    // （canvas に直接描くと、iPhone で撮ったレシートが横倒しのまま PDF に載ることがある）
+    if(window.createImageBitmap){
+      try{
+        createImageBitmap(file,{imageOrientation:"from-image"}).then(function(bmp){
+          scaleTo(bmp,bmp.width,bmp.height,"",function(durl){
+            if(bmp.close)bmp.close();
+            if(durl)cb(durl);else legacy();
+          });
+        }).catch(legacy);
+        return;
+      }catch(e){/* 下の legacy へ */}
+    }
+    legacy();
+  }
+
+  // ===== events =====
+  document.getElementById("genres").addEventListener("click",function(ev){
+    var del=ev.target.closest(".gdel");
+    if(del){
+      ev.stopPropagation();
+      var key=del.getAttribute("data-gdel");
+      var g=findGenre(key);
+      if(g&&window.confirm("「"+g.label+"」を削除しますか？（過去の記録は消えません）")){
+        saveGenresCustom(loadGenresCustom().filter(function(x){return x.key!==key;}));
+        if(state.genre===key){state.genre=null;state.room="";}
+        renderForm();
+      }
+      return;
+    }
+    if(ev.target.closest("#genreAdd")){
+      var name=window.prompt("追加する種類の名前（例：ゴミ出し）");
+      if(!name)return;
+      name=name.trim();
+      if(!name)return;
+      if(allGenres().some(function(x){return x.label===name;})){window.alert("同じ名前の種類がすでにあります");return;}
+      var feeStr=window.prompt("「"+name+"」の作業料（円・数字だけ）","1000");
+      if(feeStr===null)return;
+      var fee=parseInt(String(feeStr).replace(/[^0-9]/g,""),10);
+      if(isNaN(fee)||fee<0){window.alert("金額は数字で入れてください");return;}
+      var needRoom=window.confirm("「"+name+"」は部屋（マンション）も選ぶ種類にしますか？\nOK＝部屋を選ぶ／キャンセル＝選ばない");
+      var customs=loadGenresCustom();
+      customs.push({key:"g"+Date.now(),label:name,fee:fee,room:needRoom});
+      saveGenresCustom(customs);
+      renderForm();
+      return;
+    }
+    var b=ev.target.closest(".pick");
+    if(!b)return;
+    var gk=b.getAttribute("data-genre");
+    state.genre=(state.genre===gk)?null:gk;
+    var gg=findGenre(state.genre);
+    if(!(gg&&gg.room))state.room="";
+    renderForm();
+  });
+  elRooms.addEventListener("click",function(ev){
+    var b=ev.target.closest(".room");if(!b)return;
+    var r=b.getAttribute("data-room");state.room=(state.room===r)?"":r;renderForm();
+  });
+  elDate.addEventListener("input",renderForm);
+  elReimb.addEventListener("input",renderForm);
+
+  elAddBtn.addEventListener("click",function(){
+    if(!canAdd())return;
+    // 対象期間の外の日付なら確認（打ち間違い防止。OKなら追加できる）
+    var s=elRangeStart.value,e2=elRangeEnd.value,d=elDate.value;
+    if(s&&e2&&(d<s||d>e2)){
+      if(!window.confirm("日付 "+fmtDate(d)+" は対象期間（"+fmtDate(s)+"〜"+fmtDate(e2)+"）の外です。このまま追加しますか？"))return;
+    }
+    var g=findGenre(state.genre);
+    var a=entries();
+    if(state.editingId!==null){
+      // 既存の記録を上書き（idは保持＝写真も残る）
+      a=a.map(function(e){
+        if(e.id!==state.editingId)return e;
+        return {id:e.id,date:elDate.value,genre:state.genre,glabel:g?g.label:"",
+          room:(g&&g.room)?state.room:"",content:elContent.value.trim(),
+          fee:feeNow(),reimb:(g&&g.reimb)?reimbNow():0};
+      });
+      if(!(g&&g.reimb))delete photos[state.editingId]; // 買い物以外に変えたら写真は外す
+      setEntries(a);
+      clearEdit();
+    }else{
+      a.push({id:nextId++,date:elDate.value,genre:state.genre,glabel:g?g.label:"",
+        room:(g&&g.room)?state.room:"",content:elContent.value.trim(),
+        fee:feeNow(),reimb:(g&&g.reimb)?reimbNow():0});
+      setEntries(a);
+      state.genre=null;state.room="";elReimb.value="";elContent.value="";
+    }
+    renderForm();renderList();
+  });
+
+  elCancelEdit.addEventListener("click",function(){clearEdit();renderForm();renderList();});
+
+  // ===== バックアップ =====
+  function bkMsg(t){elBkNote.textContent=t;setTimeout(function(){elBkNote.textContent="";},3000);}
+  elBackup.addEventListener("click",function(){
+    var data={
+      app:"minpaku-keihi",version:1,savedAt:todayISO(),
+      records:loadAll(),
+      bank:loadBank(),
+      meta:loadMeta(),
+      genres:loadGenresCustom(),
+      ranges:loadRangeAll()
+    };
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="民泊経費バックアップ_"+todayISO()+".json";
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+    bkMsg("バックアップを書き出しました ✓");
+  });
+
+  elRestore.addEventListener("click",function(){elRestoreInput.value="";elRestoreInput.click();});
+  elRestoreInput.addEventListener("change",function(){
+    var f=elRestoreInput.files&&elRestoreInput.files[0];
+    if(!f)return;
+    var fr=new FileReader();
+    fr.onload=function(){
+      var d=null;
+      try{d=JSON.parse(fr.result);}catch(e){window.alert("このファイルは読めませんでした（バックアップファイルではないようです）");return;}
+      if(!d||d.app!=="minpaku-keihi"||!d.records){window.alert("このアプリのバックアップファイルではありません");return;}
+      var months=Object.keys(d.records).length;
+      if(!window.confirm("バックアップ（保存日: "+(d.savedAt||"不明")+" / "+months+"か月分）を復元します。\n今この端末にある記録は上書きされます。よろしいですか？"))return;
+      try{
+        localStorage.setItem(STORE_KEY,JSON.stringify(d.records||{}));
+        localStorage.setItem(BANK_KEY,d.bank||"");
+        localStorage.setItem(META_KEY,JSON.stringify(d.meta||{}));
+        localStorage.setItem(GENRE_KEY,JSON.stringify(d.genres||[]));
+        localStorage.setItem(RANGE_KEY,JSON.stringify(d.ranges||{}));
+      }catch(e){window.alert("保存に失敗しました");return;}
+      window.alert("復元しました。画面を読み込み直します。");
+      location.reload();
+    };
+    fr.readAsText(f);
+  });
+
+  elList.addEventListener("click",function(ev){
+    var ed=ev.target.closest(".edit");
+    if(ed){startEdit(Number(ed.getAttribute("data-edit")));return;}
+    var del=ev.target.closest(".del");
+    if(del){
+      var id=Number(del.getAttribute("data-id"));
+      setEntries(entries().filter(function(e){return e.id!==id;}));
+      delete photos[id];
+      if(state.editingId===id){clearEdit();renderForm();}
+      renderList();return;
+    }
+    var pb=ev.target.closest(".photobtn");
+    if(pb){photoTargetId=Number(pb.getAttribute("data-photo"));elPhotoInput.value="";elPhotoInput.click();}
+  });
+
+  elPhotoInput.addEventListener("change",function(){
+    var f=elPhotoInput.files&&elPhotoInput.files[0];
+    if(!f||photoTargetId==null)return;
+    readImageScaled(f,function(durl){photos[photoTargetId]=durl;renderList();});
+  });
+
+  elClear.addEventListener("click",function(){
+    if(window.confirm("この月（"+monthLabel(state.month)+"）の記録を全部消します。PDF／コピーは済みましたか？")){
+      entries().forEach(function(e){delete photos[e.id];});
+      setEntries([]);clearEdit();renderForm();renderList();
+    }
+  });
+
+  var bankTimer=null;
+  elBank.addEventListener("input",function(){
+    saveBank(elBank.value);elBankSaved.textContent="保存しました ✓";
+    clearTimeout(bankTimer);bankTimer=setTimeout(function(){elBankSaved.textContent="";},1500);
+  });
+  elStaff.addEventListener("input",saveMeta);
+  elRecipient.addEventListener("input",saveMeta);
+  elRangeStart.addEventListener("input",function(){
+    if(elRangeStart.value&&elRangeEnd.value&&elRangeStart.value>elRangeEnd.value){elRangeEnd.value=elRangeStart.value;}
+    saveRange();
+  });
+  elRangeEnd.addEventListener("input",function(){
+    if(elRangeStart.value&&elRangeEnd.value&&elRangeEnd.value<elRangeStart.value){elRangeStart.value=elRangeEnd.value;}
+    saveRange();
+  });
+
+  // レシート写真の読み込みが終わる前に印刷すると、PDF の添付が空欄になることがある
+  function printReport(){
+    buildReport();
+    var imgs=Array.prototype.slice.call(elReport.querySelectorAll("img"))
+      .filter(function(i){return !i.complete;});
+    if(!imgs.length){window.print();return;}
+    var left=imgs.length,fired=false;
+    function go(){if(fired)return;fired=true;window.print();}
+    imgs.forEach(function(i){
+      function done(){if(--left<=0)go();}
+      i.addEventListener("load",done);
+      i.addEventListener("error",done);
+    });
+    setTimeout(go,3000); // 保険。読み込めない写真があっても印刷はできる
+  }
+  window.__printReport=printReport; // テスト用フック
+  elPdf.addEventListener("click",printReport);
+
+  elCopy.addEventListener("click",function(){
+    var text=buildText();
+    function done(){elCopy.textContent="コピーしました ✓";setTimeout(function(){elCopy.textContent="ルルさんに送る文をコピー";},2200);}
+    function fb(){try{var ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");document.body.removeChild(ta);done();}catch(e){window.prompt("コピーしてください",text);}}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(fb);}else fb();
+  });
+
+  elMonth.addEventListener("change",function(){
+    clearEdit();
+    state.month=elMonth.value||thisMonth();
+    if(!elMonth.value)elMonth.value=state.month; // 月を空にされたときも表示と中身を合わせる
+    refreshNextId();
+    state.genre=null;state.room="";elReimb.value="";elContent.value="";
+    applyRangeForMonth();
+    // ② 日付を選択中の月に合わせる（今月なら今日、他の月なら1日）
+    if((elDate.value||"").slice(0,7)!==state.month){
+      elDate.value = state.month===thisMonth() ? todayISO() : firstDayOfMonth(state.month);
+    }
+    renderForm();renderList();
+  });
+
+  // ===== init =====
+  state.month=thisMonth();elMonth.value=state.month;elDate.value=todayISO();
+  elBank.value=loadBank();
+  var meta=loadMeta();elStaff.value=meta.staff||"ミント";elRecipient.value=meta.recipient||"ルルさん";
+  applyRangeForMonth();
+  refreshNextId();
+  renderForm();renderList();
+})();
+</script>
+</body>
+</html>

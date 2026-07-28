@@ -36,6 +36,9 @@ npx serve .
 ├── assets/
 │   ├── css/style.css       # 全スタイル。冒頭のカスタムプロパティで配色を管理
 │   └── js/main.js          # ナビ・カウントダウン・フォームなどの挙動
+├── minpaku-keihi/          # 民泊の経費精算ツール（お茶会サイトとは独立）
+│   ├── index.html
+│   └── README.md
 └── .github/workflows/pages.yml   # GitHub Pages への自動デプロイ
 ```
 
@@ -77,6 +80,12 @@ await fetch('https://example.com/rsvp', {
 `.github/workflows/pages.yml` を同梱しています。リポジトリの
 **Settings → Pages → Build and deployment → Source** を **GitHub Actions** に設定すると、
 `main` への push ごとに自動で公開されます。
+
+## 同梱している別のページ
+
+- **`minpaku-keihi/`** — 民泊の作業料・立替金を記録して経費精算書 PDF を出すツール。
+  お茶会サイトとは無関係な独立ページで、公開後は `/minpaku-keihi/` で開きます。
+  詳しくは [`minpaku-keihi/README.md`](minpaku-keihi/README.md) を参照してください。
 
 ## 補足
 
