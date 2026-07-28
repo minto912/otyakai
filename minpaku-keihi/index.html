@@ -775,6 +775,9 @@
   // レシート写真の読み込みが終わる前に印刷すると、PDF の添付が空欄になることがある
   function printReport(){
     buildReport();
+    // 印刷用CSSは #report が body の直下にある前提。
+    // 別のページに埋め込まれて入れ子になっても効くようにここで移しておく
+    if(elReport.parentNode!==document.body)document.body.appendChild(elReport);
     var imgs=Array.prototype.slice.call(elReport.querySelectorAll("img"))
       .filter(function(i){return !i.complete;});
     if(!imgs.length){window.print();return;}
