@@ -74,6 +74,11 @@
   .del{border:none;background:none;color:var(--red);font-size:.78rem;font-weight:700;cursor:pointer;padding:6px;flex:0 0 auto;}
   .edit{border:none;background:none;color:var(--indigo-d);font-size:.78rem;font-weight:700;cursor:pointer;padding:6px;flex:0 0 auto;}
   .row.editing{background:#f0faf4;border-radius:10px;margin:0 -8px;padding-left:8px;padding-right:8px;}
+  /* 指で押す端末では、編集と削除が隣り合っていて押し間違えやすいので大きくする */
+  @media (pointer:coarse){
+    .del,.edit{padding:13px 8px;}
+    .row .photobtn{padding:9px 12px;min-height:40px;}
+  }
   .cancel-edit{width:100%;padding:10px;font-size:.85rem;font-weight:700;background:#fff;color:var(--sub);
     border:1px solid var(--line);border-radius:10px;cursor:pointer;margin-top:8px;}
   .edit-note{font-size:.78rem;color:var(--indigo-d);font-weight:700;margin:0 0 10px;display:none;}
@@ -737,6 +742,16 @@
     });
     return records;
   }
+  // ふつうのファイルとして開いているときの保存
+  function saveViaLink(json,name){
+    var blob=new Blob([json],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=name;
+    document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+    bkMsg("バックアップを書き出しました ✓");
+  }
   elBackup.addEventListener("click",function(){
     var data={
       app:"minpaku-keihi",version:1,savedAt:todayISO(),
@@ -746,13 +761,22 @@
       genres:loadGenresCustom(),
       ranges:loadRangeAll()
     };
-    var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    var a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="民泊経費バックアップ_"+todayISO()+".json";
-    document.body.appendChild(a);a.click();
-    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
-    bkMsg("バックアップを書き出しました ✓");
+    var json=JSON.stringify(data,null,2);
+    var name="民泊経費バックアップ_"+todayISO()+".json";
+    // ページに埋め込まれて動いているときは、リンクを作る方法だと保存できないことがある。
+    // 保存の口が用意されていればそちらを使う（スマホで効かないと命綱が無くなるため）
+    if(window.claude&&window.claude.downloads){
+      window.claude.downloads.save({filename:name,data:json}).then(function(){
+        bkMsg("バックアップを書き出しました ✓");
+      },function(err){
+        var code=err&&err.code;
+        if(code==="declined")bkMsg("保存をやめました");
+        else if(code==="rate_limited")bkMsg("少し待ってもう一度押してください");
+        else saveViaLink(json,name); // 使えない場合は元のやり方で試す
+      });
+      return;
+    }
+    saveViaLink(json,name);
   });
 
   elRestore.addEventListener("click",function(){elRestoreInput.value="";elRestoreInput.click();});
@@ -785,6 +809,12 @@
     var del=ev.target.closest(".del");
     if(del){
       var id=Number(del.getAttribute("data-id"));
+      // 編集の隣にあるので、特にスマホで押し間違えやすい。消す前に必ず確認する
+      var t=null;entries().forEach(function(x){if(x.id===id)t=x;});
+      if(t){
+        var what=fmtDate(t.date)+" "+genreLabelOf(t)+(t.room?"（"+t.room+"）":(t.content?"（"+t.content+"）":""));
+        if(!window.confirm("この記録を消します。よろしいですか？\n\n"+what+"　¥"+yen(t.fee)+(t.reimb>0?" ／ 立替 ¥"+yen(t.reimb):"")))return;
+      }
       setEntries(entries().filter(function(e){return e.id!==id;}));
       delete photos[id];
       if(state.editingId===id){clearEdit();renderForm();}
